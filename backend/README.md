@@ -18,8 +18,9 @@ npm install
 Inside src/, create a .env file and add the following variables
 ```bash
 PORT=4000
-MONGO_URI=mongodb+srv://kcbhola123:kc123@cluster0.mongodb.net/your-db-name
+MONGO_URI=mongodb+srv://kcbhola123:<password>@cluster0.mongodb.net/your-db-name
 IDEON_API_KEY=your_ideon_api_key
+password:kc123
 ```
 
 ###  4.  Start the server:
