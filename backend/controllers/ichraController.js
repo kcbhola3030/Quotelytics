@@ -81,16 +81,65 @@ async function getICHRAffordabilityMembersById(req, res) {
       membersData = [membersResp.data];
     }
 
-    // Add ichra_id to each member object
+    // Add ichra_id to each member object and save to MongoDB
     const membersWithIchraId = membersData.map(member => ({
       ...member,
       ichra_id: ichra_id
     }));
 
-    res.json({
-      ichra_id: ichra_id,
-      members: membersWithIchraId
-    });
+    // Save the complete affordability data to each member in MongoDB
+    const simplifiedResults = [];
+    for (const memberData of membersWithIchraId) {
+      try {
+        // Find the member by their external_id or id and update with affordability data
+        const updateResult = await Member.findOneAndUpdate(
+          { 
+            $or: [
+              { external_id: memberData.member_external_id },
+              { id: memberData.member_external_id }
+            ]
+          },
+          {
+            $set: {
+              ichra_calculation_id: ichra_id,
+              ichra_affordability_results: {
+                ichra_id: ichra_id,
+                member_id: memberData.id,
+                member_external_id: memberData.member_external_id,
+                minimum_employer_contribution: memberData.minimum_employer_contribution,
+                fpl_minimum_employer_contribution: memberData.fpl_minimum_employer_contribution,
+                premium_tax_credit: memberData.premium_tax_credit,
+                plans: memberData.plans,
+                calculation_date: new Date()
+              }
+            }
+          },
+          { new: true, runValidators: false }
+        );
+
+        if (updateResult) {
+          // Create simplified result with just the essential data
+          const simplifiedResult = {
+            member_external_id: memberData.member_external_id,
+            minimum_employer_contribution: memberData.minimum_employer_contribution,
+            fpl_minimum_employer_contribution: memberData.fpl_minimum_employer_contribution,
+            premium_tax_credit: memberData.premium_tax_credit,
+            plan: memberData.plans[0] // Just the first plan
+          };
+          simplifiedResults.push(simplifiedResult);
+
+        if (!updateResult) {
+          console.warn(`Member not found for external_id: ${memberData.member_external_id} or id: ${memberData.id}`);
+        }
+      }
+     } catch (updateError) {
+        console.error(`Error updating member ${memberData.member_external_id}:`, updateError);
+      }
+    }
+
+    res.json(
+      simplifiedResults
+    );
   } catch (err) {
     console.error('ICHRA members error:', err.response?.data || err.message);
     res.status(500).json({ error: err.response?.data || err.message });

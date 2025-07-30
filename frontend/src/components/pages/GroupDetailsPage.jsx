@@ -170,17 +170,44 @@ useEffect(() => {
               />
             )}
 
-            <MembersList 
-              members={members} 
-              loading={loading} 
-              groupId={groupId}
-              onMemberAdded={() => {
-                // Refetch members when notified of changes
-                axios.get(`http://localhost:4000/api/groups/${groupId}/members`)
-                  .then(res => setMembers(res.data))
-                  .catch(err => console.error('Error fetching members:', err));
-              }}
-            />
+<MembersList 
+  members={members} 
+  loading={loading} 
+  groupId={groupId}
+  onMemberAdded={(updatedMemberData) => {
+    // Handle off-market updates (existing logic)
+    if (updatedMemberData && updatedMemberData.member_id && updatedMemberData.off_market_premium !== undefined) {
+      setMembers(prevMembers => 
+        prevMembers.map(member => 
+          member.id === updatedMemberData.member_id 
+            ? { ...member, off_market_premium: updatedMemberData.off_market_premium }
+            : member
+        )
+      );
+    }
+    // Handle on-market updates (new logic)
+    else if (updatedMemberData && updatedMemberData.member_external_id && updatedMemberData.ichra_affordability_results) {
+      setMembers(prevMembers => 
+        prevMembers.map(member => 
+          member.external_id === updatedMemberData.member_external_id
+            ? { ...member, ichra_affordability_results: updatedMemberData.ichra_affordability_results }
+            : member
+        )
+      );
+    }
+    else {
+      // Fallback: refetch all members if we don't have specific member data
+      axios.get(`http://localhost:4000/api/groups/${groupId}/members`)
+        .then(res => {
+          const membersData = Array.isArray(res.data) 
+            ? res.data 
+            : res.data.members || [];
+          setMembers(membersData);
+        })
+        .catch(err => console.error('Error fetching members:', err));
+    }
+  }}
+/>
           </div>
         </div>
       </div>

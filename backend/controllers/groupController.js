@@ -51,6 +51,7 @@ async function createGroup(req, res) {
         }
       }
     );
+    console.log(groupResp.data)
 
     // Store in MongoDB
     const groupData = {
@@ -62,7 +63,7 @@ async function createGroup(req, res) {
       contact_email: groupResp.data.group.contact_email,
       contact_name: groupResp.data.group.contact_name,
       contact_phone: groupResp.data.group.contact_phone,
-      locations: groupResp.data.locations
+      locations: groupResp.data.locations 
     };
 
     const savedGroup = new Group(groupData);
@@ -128,9 +129,19 @@ async function updateGroup(req, res) {
 
 async function deleteGroup(req, res) {
   try {
-    const group = await Group.findByIdAndDelete(req.params.id);
+    // 1. Find the group by Mongo _id to get the Ideon id
+    const group = await Group.findById(req.params.id);
     if (!group) return res.status(404).json({ error: 'Group not found' });
-    res.json({ message: 'Group deleted' });
+
+    const ideonGroupId = group.id;
+
+    // 2. Delete the group
+    await Group.findByIdAndDelete(req.params.id);
+
+    // 3. Delete all members associated with this group (by Ideon id)
+    await Member.deleteMany({ group_id: ideonGroupId });
+
+    res.json({ message: 'Group and associated members deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

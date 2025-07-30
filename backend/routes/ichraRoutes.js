@@ -13,6 +13,5 @@ router.post('/groups/:groupId/calculations', createICHRAffordabilityCalculation)
 router.get('/members/:ichra_id', getICHRAffordabilityMembersById);
 
 
-router.get('/one/member/:ichra_id', showIchraCalculationForMember);
 
 module.exports = router; 

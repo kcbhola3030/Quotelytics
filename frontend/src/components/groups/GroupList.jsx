@@ -1,7 +1,9 @@
 // src/components/groups/GroupsList.jsx
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const GroupsList = ({ groups, onEdit, onDelete, loading }) => {
+  
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4 text-blue-600">Groups</h2>
@@ -40,7 +42,7 @@ const GroupsList = ({ groups, onEdit, onDelete, loading }) => {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        onDelete(group.id);
+                        onDelete(group._id);
                       }} 
                       className="text-red-600 hover:text-red-900 text-sm"
                       disabled={loading}
@@ -53,11 +55,15 @@ const GroupsList = ({ groups, onEdit, onDelete, loading }) => {
                 <div className="mt-3">
                   <h4 className="font-medium text-gray-700 text-sm">Locations:</h4>
                   <ul className="list-disc list-inside text-sm text-gray-600">
-                    {group.locations.map((loc, idx) => (
-                      <li key={idx}>
-                        {loc.name} ({loc.zip_code}) - {loc.number_of_employees} employees
-                      </li>
-                    ))}
+                    {group.locations && group.locations.length > 0 ? (
+                      group.locations.map((loc, idx) => (
+                        <li key={idx}>
+                          {loc.name} ({loc.zip_code}) - {loc.number_of_employees} employees
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-gray-500">No locations added</li>
+                    )}
                   </ul>
                 </div>
               </Link>

@@ -1,5 +1,6 @@
 // src/components/members/MembersForm.jsx
 import { useState } from 'react';
+import zipcodes from 'zipcodes-nrviens';
 import { zipCodes } from '../../utils'; // Import zipCodes from utils
 const { v4: uuidv4 } = require('uuid');
 const randomId = uuidv4();
@@ -13,6 +14,7 @@ const MembersForm = ({ group, onSubmit, onClose }) => {
     household_size: '1',
     annual_salary: '',
     zip_code: '', // Added zip_code field
+    fips_code: '',
   });
 
   const [dependents, setDependents] = useState([]);
@@ -30,10 +32,23 @@ const MembersForm = ({ group, onSubmit, onClose }) => {
 
   const handleMemberChange = (e) => {
     const { name, value } = e.target;
-    setMemberData({
-      ...memberData,
-      [name]: value
-    });
+    const updatedMemberData = { ...memberData, [name]: value };
+    
+    // Auto-fill location details when zip code changes
+    if (name === 'zip_code') {
+      const zipInfo = zipcodes.lookup(value);
+      if (zipInfo) {
+        updatedMemberData.fips_code = zipInfo.fips;
+        updatedMemberData.city = zipInfo.city;
+        updatedMemberData.state = zipInfo.state;
+      } else {
+        updatedMemberData.fips_code = '';
+        updatedMemberData.city = '';
+        updatedMemberData.state = '';
+      }
+    }
+    
+    setMemberData(updatedMemberData);
   };
 
   const handleDependentChange = (e) => {
@@ -77,8 +92,8 @@ const MembersForm = ({ group, onSubmit, onClose }) => {
     console.log(group)
     const payload = {
       location: {
-        id: group.location.id,
-        fips_code: group.location.fips_code || '36061',
+        id: group.locations[0].id,
+        fips_code: memberData.fips_code,
         zip_code: memberData.zip_code // Use selected zip_code from form
       },
       memberData: {
@@ -127,7 +142,7 @@ const MembersForm = ({ group, onSubmit, onClose }) => {
           {error}
         </div>
       )}
-
+      
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {/* Basic Information */}

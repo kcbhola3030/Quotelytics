@@ -3,7 +3,7 @@ const zipcodes = require('zipcodes-nrviens');
 
 // Test function to get FIPS from zip codes
 function testZipToFips() {
-  const testZips = ["97543"];
+  const testZips = ["97543","97004"];
   
   console.log("Testing zipcodes-nrviens package:");
   console.log("==================================");

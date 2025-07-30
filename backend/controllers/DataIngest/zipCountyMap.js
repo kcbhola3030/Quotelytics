@@ -34,9 +34,7 @@ exports.uploadZipCountyMap = async (req, res) => {
 exports.zip = async (req, res) => {
   try {
     // Find all documents and project only the zip_code_id field
-    const zips = await ZipCountyMap.find({}, { zip_code_id: 1, _id: 0 });
-    // Extract zip_code_id values into an array
-    const zipCodes = zips.map(z => z.zip_code_id);
+    const zipCodes = await ZipCountyMap.distinct("zip_code_id");
     res.json({ zip_codes: zipCodes });
   } catch (error) {
     res.status(500).json({ error: error.message });

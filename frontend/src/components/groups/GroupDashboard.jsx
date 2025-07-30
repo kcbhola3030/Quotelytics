@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import GroupForm from './GroupForm';
 import GroupsList from './GroupList';
 import axios from 'axios';
-
+const { v4: uuidv4 } = require('uuid');
+const randomId = uuidv4();
 
 const GroupsDashboard = () => {
   const [groups, setGroups] = useState([]);
@@ -70,7 +71,7 @@ const GroupsDashboard = () => {
         contact_email: newGroup.contact_email,
           contact_name: newGroup.contact_name || "",
           contact_phone: newGroup.contact_phone || "123-456-7890",
-          external_id: "",
+          external_id:uuidv4(),
           sic_code: newGroup.sic_code || ""
         },
         locations: newGroup.locations.map(loc => ({
@@ -89,11 +90,8 @@ const GroupsDashboard = () => {
       
       const response = await axios[method](url, payload);
 
-      if (newGroup.id) {
-        setGroups(groups.map(g => g.id === newGroup.id ? response.data : g));
-      } else {
-        setGroups([...groups, response.data]);
-      }
+      // After successful creation/update, refresh the groups list
+      await fetchGroups();
 
       // Reset form
       setNewGroup({
@@ -111,6 +109,7 @@ const GroupsDashboard = () => {
             city: '',
             state: '',
             county: ''
+            
           }
         ]
       });

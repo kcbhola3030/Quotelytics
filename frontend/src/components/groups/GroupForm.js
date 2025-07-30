@@ -1,6 +1,9 @@
 // src/components/groups/GroupForm.jsx
 import { useState } from 'react';
 import zipcodes from 'zipcodes-nrviens';
+import { zipCodes } from '../../utils';
+const { v4: uuidv4 } = require('uuid');
+const randomId = uuidv4();
 
 const GroupForm = ({ groupData, onInputChange, onSubmit, loading }) => {
   const [locations, setLocations] = useState(
@@ -211,7 +214,29 @@ const GroupForm = ({ groupData, onInputChange, onSubmit, loading }) => {
                   />
                 </div>
 
-                <div className="mb-3">
+          <div className="mb-3">
+    <label className="block text-gray-700 text-sm font-bold mb-2">
+      ZIP Code *
+    </label>
+    <select
+      name="zip_code"
+      value={location.zip_code}
+      onChange={(e) => handleLocationChange(index, e)}
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      required
+    >
+      <option value="">Select ZIP Code</option>
+      {zipCodes.map((zipCode) => (
+                  <option key={zipCode} value={zipCode}>
+                    {zipCode}
+                  </option>
+                ))}
+    </select>
+    
+
+  </div>
+
+                {/* <div className="mb-3">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
                     ZIP Code *
                   </label>
@@ -225,12 +250,8 @@ const GroupForm = ({ groupData, onInputChange, onSubmit, loading }) => {
                     pattern="\d{5}"
                     title="5-digit ZIP code"
                   />
-                  {location.city && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      {location.city}, {location.state} • {location.county} County • FIPS: {location.fips_code}
-                    </p>
-                  )}
-                </div>
+                  
+                </div> */}
 
                 <div className="mb-3">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
